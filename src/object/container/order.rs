@@ -1,4 +1,4 @@
-use super::mdobject::MDObject;
+use super::MDObject;
 
 #[derive(Debug)]
 pub struct Order {
