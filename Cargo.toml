@@ -1,0 +1,7 @@
+[package]
+name = "markdown"
+version = "0.1.0"
+authors = ["hnkz <cs16075@s.inf.shizuoka.ac.jp>"]
+edition = "2018"
+
+[dependencies]
