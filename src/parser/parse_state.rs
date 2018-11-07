@@ -28,8 +28,8 @@ pub enum ParseState {
     Link, // [test](url)
     Image, // ![alt text][url]
     Quote, // >
-    Bold, // --text-- , **text**, +text+
-    Italic, // -text-, *text*, +text+
+    Bold, // __text__ , **text**
+    Italic, // _text_, *text*
     Strikethrough,// ~~text~~
     Line, // ---, ***, +++
 }

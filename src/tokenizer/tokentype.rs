@@ -22,8 +22,8 @@ pub enum TokenType {
     ImageURLStart, // "("
     ImageURLEnd, // ")"
     Quote, // ">"
-    Bold, // "--" | "**" | "++"
-    Italic, // "-" | "*" | "+"
+    Bold, // "__" | "**"
+    Italic, // "_" | "*"
     Strikethrough, // "~~"
     Line, // "---" | "***" | "+++"
 }
