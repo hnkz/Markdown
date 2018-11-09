@@ -1,5 +1,5 @@
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TokenType {
     Head1, // "# "
     Head2, // "## "
@@ -10,8 +10,10 @@ pub enum TokenType {
     Order, // "1." .. "9."
     CodeInline, // "`"
     CodeBlock, // "```"
-    TableStick, // '|'
-    TableMiddle, // "--|"
+    TableStart,
+    TableColumn,
+    TableContents,
+    TableEnd,
     URLLinkStart, // "["
     LinkEnd, // "]"
     URLStart, // "("

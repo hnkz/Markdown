@@ -14,4 +14,12 @@ impl Token {
             val: val,
         }
     }
+
+    pub fn get_state(&self) -> TokenType {
+        self.t_type.clone()
+    }
+
+    pub fn get_val(&self) -> String {
+        self.val.to_owned()
+    }
 }

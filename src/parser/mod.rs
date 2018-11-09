@@ -5,3 +5,4 @@ pub use self::parse_state::ParseState;
 pub use self::parser::Parser;
 
 use super::tokenizer::Token;
+use super::tokenizer::TokenType;

@@ -1,14 +1,3 @@
- 
-use super::super::object::{
-    MDObject,
-    Head1,
-    Head2,
-    Head3,
-    Head4,
-    Head5,
-    Container,
-    Paragragh,
-};
 
 #[derive(Debug)]
 pub enum ParseState {
@@ -35,28 +24,5 @@ pub enum ParseState {
 }
 
 impl ParseState {
-    pub fn get_obj(state: ParseState) -> Box<MDObject> {
-        match state {
-            // None,
-            Paragragh => Box::new(Paragragh::new()),
-            // Head1 => Head1::new(),
-            // Head2,
-            // Head3,
-            // Head4,
-            // Head5,
-            // List,
-            // Order,
-            // CodeInline,
-            // CodeBlock,
-            // Table,
-            // Link,
-            // Image,
-            // Quote,
-            // Bold,
-            // Italic,
-            // Strikethrough,
-            // Line,
-            _ => Box::new(Paragragh::new())
-        }
-    }
+
 }

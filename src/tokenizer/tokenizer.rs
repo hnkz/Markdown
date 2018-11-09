@@ -3,172 +3,182 @@ use super::TokenType;
 
 #[derive(Debug)]
 pub struct Tokenizer {
-
+    skip_space: bool,
+    state: TokenType,
+    idx: usize,
+    buf: Vec<char>,
+    buflen: usize,
 }
 
 impl Tokenizer {
-    pub fn new() -> Tokenizer {
+    pub fn new(buf: &mut str) -> Tokenizer {
+        let buf: Vec<char> = buf.chars().collect();
+        let buflen = buf.len();
         Tokenizer {
-
+            skip_space: false,
+            state: TokenType::None,
+            idx: 0usize,
+            buf: buf,
+            buflen: buflen,
         }
     }
 
-    pub fn tokenize(&mut self, buf: &mut str) -> Vec<Token> {
-        let mut state = TokenType::None;
-        let mut tokens: Vec<Token> = Vec::new();
+    pub fn tokenize(&mut self) -> Vec<Token> {
         let mut t_str = String::new();
-        let buf: Vec<char> = buf.chars().collect();
-        let mut idx = 0;
-        while idx < buf.len() {
-            let mut c = buf[idx];
+        let mut tokens: Vec<Token> = Vec::new();
 
-            // escape processing
+        while let Some(c) = self.now() {
+
+            // especially case
             if c == '\\' {
-                idx+=1;
-                if idx < buf.len() {
-                    c = buf[idx];
-                    state = TokenType::Str;
-                } else {
-                    continue;
-                }
+                let c = match self.next() {
+                    Some(c) => c,
+                    None => {
+                        continue;
+                    }   
+                };
+            } else if self.skip_space && (c == ' ' || c == '\t') {
+                let _c = self.next();
+                continue;
             }
+
             t_str.push(c);
 
-            match state {
+            match self.state {
                 TokenType::None => {
                     match c {
                         '#' => {
-                            state = TokenType::Head1;
+                            self.setState(TokenType::Head1);
                         }
                         '-' => {
-                            state = TokenType::List;
+                            self.setState(TokenType::List);
                         }
                         '0' ... '9' => {
-                            state = TokenType::Order;
+                            self.setState(TokenType::Order);
                         }
                         '`' => {
-                            state = TokenType::CodeInline;
+                            self.setState(TokenType::CodeInline);
                         }
                         '|' => {
-                            let token = Token::new(t_str.to_owned(), TokenType::TableStick);
+                            let token = Token::new(t_str.to_owned(), TokenType::TableStart);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::TableStart);
                         }
                         '[' => {
                             let token = Token::new(t_str.to_owned(), TokenType::URLLinkStart);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         ']' => {
                             let token = Token::new(t_str.to_owned(), TokenType::LinkEnd);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         '(' => {
                             let token = Token::new(t_str.to_owned(), TokenType::URLStart);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         ')' => {
                             let token = Token::new(t_str.to_owned(), TokenType::URLEnd);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         '!' => {
-                            state = TokenType::ImageLinkStart;
+                            self.setState(TokenType::ImageLinkStart);
                         }
                         '>' => {
-                            state = TokenType::Quote;
+                            self.setState(TokenType::Quote);
                         }
                         '*' => {
-                            state = TokenType::Italic;
+                            self.setState(TokenType::Italic);
                         }
                         '~' => {
-                            state = TokenType::Strikethrough;
+                            self.setState(TokenType::Strikethrough);
+                        }
+                        '\t' => {
+                            self.setState(TokenType::Tab);
+                        }
+                        ' ' => {
+                            self.setState(TokenType::Space);
                         }
                         '\n' => {
                             let token = Token::new(t_str.to_owned(), TokenType::NewLine);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
-                        }
-                        '\t' => {
-                            state = TokenType::Tab;
-                        }
-                        ' ' => {
-                            state = TokenType::Space;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
                 TokenType::Head1 => {
                     match c {
                         '#' => {
-                            state = TokenType::Head2;
+                            self.setState(TokenType::Head2);
                         }
                         ' ' => {
                             let token = Token::new(t_str.to_owned(), TokenType::Head1);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
                 TokenType::Head2 => {
                     match c {
                         '#' => {
-                            state = TokenType::Head3;
+                            self.setState(TokenType::Head3);
                         }
                         ' ' => {
                             let token = Token::new(t_str.to_owned(), TokenType::Head2);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
                 TokenType::Head3 => {
                     match c {
                         '#' => {
-                            state = TokenType::Head4;
+                            self.setState(TokenType::Head4);
                         }
                         ' ' => {
                             let token = Token::new(t_str.to_owned(), TokenType::Head3);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
                 TokenType::Head4 => {
                     match c {
                         '#' => {
-                            state = TokenType::Head5;
+                            self.setState(TokenType::Head5);
                         }
                         ' ' => {
                             let token = Token::new(t_str.to_owned(), TokenType::Head4);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
@@ -178,10 +188,10 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::Head5);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
@@ -191,13 +201,23 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::List);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+
+                            self.setState(TokenType::None);
                         }
                         '-' => {
-                            state = TokenType::TableMiddle;
+                            let c = if let Some(c) = self.next() {
+                                c
+                            } else {
+                                continue;
+                            };
+                            if c == '-' {
+                                let token = Token::new("---".to_owned(), TokenType::Line);
+                                tokens.push(token);
+                                t_str.clear();
+                            }
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
@@ -207,25 +227,27 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::Order);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
+                            // read space
+                            self.next();
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
                 TokenType::CodeInline => {
                     match c {
                         '`' => {
-                            state = TokenType::CodeBlock;
+                            self.setState(TokenType::CodeBlock);
                         }
                         _ => {
                             t_str.pop();
                             let token = Token::new(t_str.to_owned(), TokenType::CodeInline);
                             tokens.push(token);
                             t_str.clear();
-                            idx -= 1;
-                            state = TokenType::None;
+                            self.before();
+                            self.setState(TokenType::None);
                         }
                     }
                 }
@@ -235,31 +257,86 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::CodeBlock);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.next(); // skip newline code
+                            while let Some(c) = self.next() {
+                                if c == '`' {
+                                    let c2 = if let Some(c2) = self.next() {
+                                        c2
+                                    } else {
+                                        break;
+                                    };
+                                    let c3 = if let Some(c3) = self.next() {
+                                        c3
+                                    } else {
+                                        break;
+                                    };
+                                    if c2 == '`' && c3 == '`' {
+                                        let token = Token::new(t_str.to_owned(), TokenType::Str);
+                                        tokens.push(token);
+                                        let token = Token::new("```".to_owned(), TokenType::CodeBlock);
+                                        tokens.push(token);
+                                        self.setState(TokenType::None);
+                                        t_str.clear();
+                                        break;
+                                    }
+                                } else {
+                                    t_str.push(c);
+                                }
+                            }
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
-                TokenType::TableMiddle => {
-                    match c {
-                        '|' => {
-                            let token = Token::new(t_str.to_owned(), TokenType::TableMiddle);
+                TokenType::TableStart => {
+                    // read head
+                    let mut rownum = 0;
+                    while let Some(c) = self.next() {
+                        if c == '|' {
+                            rownum += 1;
+                            let token = Token::new(t_str.to_owned(), TokenType::TableColumn);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
-                        }
-                        '-' => {
-                            let token = Token::new(t_str.to_owned(), TokenType::Line);
-                            tokens.push(token);
-                            t_str.clear();
-                            state = TokenType::None;
-                        }
-                        _ => {
-                            state = TokenType::Str;
+                        } else if c == '\n' {
+                            break;
+                        } else if c == ' ' {
+
+                        } else {
+                            t_str.push(c);
                         }
                     }
+                    // read middle head
+                    while let Some(c) = self.next() {
+                        if c == '\n' {
+                            break;
+                        }
+                    }
+                    //read contents
+                    self.next(); // read first stick
+                    while let Some(c) = self.next() {
+                        if c == '|' {
+                            let token = Token::new(t_str.to_owned(), TokenType::TableContents);
+                            tokens.push(token);
+                            t_str.clear();
+                        } else if c == '\n' {
+                            let c = if let Some(c) = self.next() {
+                                c
+                            } else {
+                                break;
+                            };
+                            if c != '|' {
+                                let token = Token::new("|".to_owned(), TokenType::TableEnd);
+                                tokens.push(token);
+                                break;
+                            }
+                        } else {
+                            t_str.push(c);
+                        }
+                    }
+                    self.setState(TokenType::None);
+                    
                 }
                 TokenType::ImageLinkStart => {
                     match c {
@@ -267,10 +344,10 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::ImageLinkStart);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
@@ -280,10 +357,10 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::Quote);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
@@ -293,15 +370,15 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::Bold);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
                             t_str.pop();
                             let token = Token::new(t_str.to_owned(), TokenType::Italic);
                             tokens.push(token);
                             t_str.clear();
-                            idx -= 1;
-                            state = TokenType::None;
+                            self.before();
+                            self.setState(TokenType::None);
                         }
                     }
                 }
@@ -311,22 +388,22 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::Strikethrough);
                             tokens.push(token);
                             t_str.clear();
-                            state = TokenType::None;
+                            self.setState(TokenType::None);
                         }
                         _ => {
-                            state = TokenType::Str;
+                            self.setState(TokenType::Str);
                         }
                     }
                 }
                 TokenType::Str => {
                     match c {
-                        '#' | '-' | '`' | '[' | ']' | '!' | '(' | ')' | '>' | '*' | '~' | '\n' | '|' => {
+                        '`' | '[' | ']' | '!' | '(' | ')' | '*' | '~' | '\n' | '|' => {
                             t_str.pop();
                             let token = Token::new(t_str.to_owned(), TokenType::Str);
                             tokens.push(token);
                             t_str.clear();
-                            idx -= 1;
-                            state = TokenType::None;
+                            self.before();
+                            self.setState(TokenType::None);
                         }
                         _ => {
 
@@ -341,8 +418,8 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::Space);
                             tokens.push(token);
                             t_str.clear();
-                            idx -= 1;
-                            state = TokenType::None;
+                            self.before();
+                            self.setState(TokenType::None);
                         }
                     }
                 }
@@ -354,20 +431,133 @@ impl Tokenizer {
                             let token = Token::new(t_str.to_owned(), TokenType::Space);
                             tokens.push(token);
                             t_str.clear();
-                            idx -= 1;
-                            state = TokenType::None;
+                            self.before();
+                            self.setState(TokenType::None);
                         }
                     }
                 }
-                _ | TokenType::TableStick |
-                TokenType::URLLinkStart | TokenType::LinkEnd |
-                TokenType::URLStart | TokenType::URLEnd |
-                TokenType::Line | TokenType::Bold => {}
+                _  => {}
             }
 
-            idx += 1;
+            self.next();
         }
 
         tokens
+    }
+
+    fn setState(&mut self, state: TokenType) {
+        self.state = state;
+        match self.state {
+            TokenType::Head1 => {
+
+            }
+            TokenType::Head2 => {
+
+            }
+            TokenType::Head3 => {
+
+            }
+            TokenType::Head4 => {
+
+            }
+            TokenType::Head5 => {
+
+            }
+            TokenType::List => {
+
+            }
+            TokenType::Order => {
+
+            }
+            TokenType::CodeInline => {
+
+            }
+            TokenType::CodeBlock => {
+
+            }
+            TokenType::TableStart => {
+
+            }
+            TokenType::TableColumn => {
+
+            }
+            TokenType::TableContents => {
+
+            }
+            TokenType::TableEnd => {
+
+            }
+            TokenType::URLLinkStart => {
+
+            }
+            TokenType::LinkEnd => {
+
+            }
+            TokenType::URLStart => {
+
+            }
+            TokenType::URLEnd => {
+
+            }
+            TokenType::ImageLinkStart => {
+
+            }
+            TokenType::Quote => {
+
+            }
+            TokenType::Bold => {
+
+            }
+            TokenType::Italic => {
+
+            }
+            TokenType::Strikethrough => {
+
+            }
+            TokenType::Line => {
+
+            }
+            TokenType::Str => {
+
+            }
+            TokenType::NewLine => {
+
+            }
+            TokenType::Space => {
+
+            }
+            TokenType::Tab => {
+
+            }
+            TokenType::None => {
+
+            }
+        }
+    }
+
+    fn next(&mut self) -> Option<char> {
+        self.idx += 1;
+        if self.idx < self.buflen {
+            Some(self.buf[self.idx])
+        } else {
+            None
+        }
+    }
+
+    fn now(&mut self) -> Option<char> {
+        if self.idx < self.buflen {
+            Some(self.buf[self.idx])
+        } else {
+            None
+        }
+    }
+
+    fn before(&mut self) -> Option<char> {
+        self.idx -= 1;
+        if self.idx < self.buflen {
+            Some(self.buf[self.idx])
+        } else {
+            None
+        }
     }
 }

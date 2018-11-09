@@ -6,9 +6,9 @@ pub struct Head1 {
 }
 
 impl Head1 {
-    pub fn new() -> Head1 {
+    pub fn new(val: &mut str) -> Head1 {
         Head1 {
-            val: String::new(),
+            val: val.to_string(),
         }
     }
 }

@@ -8,12 +8,8 @@ pub struct Markdown {
 
 impl Markdown {
     pub fn new(buf: &mut str) -> Markdown {
-        let mut tokenizer = Tokenizer::new();
-        let tokens: Vec<Token> = tokenizer.tokenize(buf);
-
-        for token in &tokens {
-            println!("{:?}", token);
-        }
+        let mut tokenizer = Tokenizer::new(buf);
+        let tokens: Vec<Token> = tokenizer.tokenize();
 
         let mut parser = Parser::new();
         let obj = parser.parse(tokens);
