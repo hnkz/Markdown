@@ -6,3 +6,4 @@ pub use self::parser::Parser;
 
 use super::tokenizer::Token;
 use super::tokenizer::TokenType;
+use super::object;

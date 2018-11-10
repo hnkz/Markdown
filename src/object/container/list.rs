@@ -14,7 +14,7 @@ impl List {
 }
 
 impl MDObject for List {
-    fn parse(&mut self, buf: &mut str) {
-        self.val = buf.to_string();
+    fn output(&self) {
+        
     }
 }

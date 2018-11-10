@@ -14,7 +14,7 @@ impl Line {
 }
 
 impl MDObject for Line {
-    fn parse(&mut self, buf: &mut str) {
+    fn output(&self) {
         
     }
 }

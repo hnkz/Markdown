@@ -27,4 +27,5 @@ fn main() {
     }
 
     let mut markdown = Markdown::new(buf.as_mut_str());
+    markdown.output();
 }

@@ -14,7 +14,7 @@ impl Head2 {
 }
 
 impl MDObject for Head2 {
-    fn parse(&mut self, buf: &mut str) {
-        self.val = buf.to_string();
+    fn output(&self) {
+        println!("{:?}", self);
     }
 }

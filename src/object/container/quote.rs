@@ -14,7 +14,7 @@ impl Quote {
 }
 
 impl MDObject for Quote {
-    fn parse(&mut self, buf: &mut str) {
-        self.val = buf.to_string();
+    fn output(&self) {
+        
     }
 }
