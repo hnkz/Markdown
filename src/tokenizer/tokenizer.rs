@@ -102,10 +102,16 @@ impl Tokenizer {
                             self.setState(TokenType::Strikethrough);
                         }
                         '\t' => {
-                            self.setState(TokenType::Tab);
+                            let token = Token::new(t_str.to_owned(), TokenType::Tab);
+                            tokens.push(token);
+                            t_str.clear();
+                            self.setState(TokenType::None);
                         }
                         ' ' => {
-                            self.setState(TokenType::Space);
+                            let token = Token::new(t_str.to_owned(), TokenType::Space);
+                            tokens.push(token);
+                            t_str.clear();
+                            self.setState(TokenType::None);
                         }
                         '\n' => {
                             let token = Token::new(t_str.to_owned(), TokenType::NewLine);
@@ -407,32 +413,6 @@ impl Tokenizer {
                         }
                         _ => {
 
-                        }
-                    }
-                }
-                TokenType::Space => {
-                    match c {
-                        ' ' => {}
-                        _ => {
-                            t_str.pop();
-                            let token = Token::new(t_str.to_owned(), TokenType::Space);
-                            tokens.push(token);
-                            t_str.clear();
-                            self.before();
-                            self.setState(TokenType::None);
-                        }
-                    }
-                }
-                TokenType::Tab => {
-                    match c {
-                        '\t' => {}
-                        _ => {
-                            t_str.pop();
-                            let token = Token::new(t_str.to_owned(), TokenType::Space);
-                            tokens.push(token);
-                            t_str.clear();
-                            self.before();
-                            self.setState(TokenType::None);
                         }
                     }
                 }

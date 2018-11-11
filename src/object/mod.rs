@@ -8,7 +8,8 @@ pub mod head5;
 pub mod container;
 pub mod mdobject;
 pub mod line;
-pub mod option;
+pub mod string;
+pub mod codeblock;
 
 pub use self::markdown::Markdown;
 pub use self::paragragh::Paragragh;
@@ -20,6 +21,7 @@ pub use self::head5::Head5;
 pub use self::container::Container;
 pub use self::mdobject::MDObject;
 pub use self::line::Line;
+pub use self::codeblock::CodeBlock;
 // pub use self::option::bold::Bold;
 // pub use self::option::italic::Italic;
 

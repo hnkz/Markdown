@@ -6,15 +6,15 @@ pub struct Quote {
 }
 
 impl Quote {
-    pub fn new() -> Quote {
+    pub fn new(val: String) -> Quote {
         Quote {
-            val: String::new(),
+            val: val,
         }
     }
 }
 
 impl MDObject for Quote {
     fn output(&self) {
-        
+        println!("{:?}", self);
     }
 }

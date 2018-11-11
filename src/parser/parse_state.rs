@@ -2,7 +2,6 @@
 #[derive(Debug)]
 pub enum ParseState {
     None,
-    Normal,
     Head1, // #
     Head2, // ##
     Head3, // ###
@@ -12,15 +11,12 @@ pub enum ParseState {
     Order, // 1.
     CodeInline, // `
     CodeBlock, // ```
-    TableHead, // |--|--|
-    TableContents,
+    Table,
     Link, // [test](url)
     Image, // ![alt text][url]
     Quote, // >
-    Bold, // __text__ , **text**
-    Italic, // _text_, *text*
-    Strikethrough,// ~~text~~
     Line, // ---, ***, +++
+    Paragraph,
 }
 
 impl ParseState {

@@ -1,19 +1,19 @@
 use super::mdobject::MDObject;
 
 #[derive(Debug)]
-pub struct Head4 {
+pub struct CodeBlock {
     val: String,
 }
 
-impl Head4 {
-    pub fn new(val: String) -> Head4 {
-        Head4 {
+impl CodeBlock {
+    pub fn new(val: String) -> CodeBlock {
+        CodeBlock {
             val: val,
         }
     }
 }
 
-impl MDObject for Head4 {
+impl MDObject for CodeBlock {
     fn output(&self) {
         println!("{:?}", self);
     }

@@ -11,8 +11,8 @@ impl Markdown {
         let mut tokenizer = Tokenizer::new(buf);
         let tokens: Vec<Token> = tokenizer.tokenize();
 
-        let mut parser = Parser::new();
-        let obj = parser.parse(tokens);
+        let mut parser = Parser::new(tokens);
+        let obj = parser.parse();
         
         Markdown {
             obj: obj
@@ -22,7 +22,6 @@ impl Markdown {
 
 impl MDObject for Markdown {
     fn output(&self) {
-        println!("{}", self.obj.len());
         for obj in &self.obj {
             obj.output();
         }

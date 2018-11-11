@@ -1,20 +1,21 @@
 use super::MDObject;
+use super::Str;
 
 #[derive(Debug)]
 pub struct List {
-    val: String,
+    val: Str,
 }
 
 impl List {
-    pub fn new() -> List {
+    pub fn new(val: Str) -> List {
         List {
-            val: String::new(),
+            val: val,
         }
     }
 }
 
 impl MDObject for List {
     fn output(&self) {
-        
+        println!("{:?}", self);
     }
 }
