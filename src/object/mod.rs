@@ -1,5 +1,5 @@
 pub mod markdown;
-pub mod paragragh;
+pub mod paragraph;
 pub mod head1;
 pub mod head2;
 pub mod head3;
@@ -12,7 +12,7 @@ pub mod string;
 pub mod codeblock;
 
 pub use self::markdown::Markdown;
-pub use self::paragragh::Paragragh;
+pub use self::paragraph::Paragraph;
 pub use self::head1::Head1;
 pub use self::head2::Head2;
 pub use self::head3::Head3;

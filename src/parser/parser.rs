@@ -4,7 +4,7 @@ use super::ParseState;
 use super::object::MDObject;
 use super::object::{
     Head1, Head2, Head3, Head4, Head5,
-    CodeBlock,
+    CodeBlock, Paragraph,
 };
 use super::object::string::{
     Str, StrType,
@@ -39,7 +39,7 @@ impl Parser {
         // let mut lcontainer: Container<List>;
         // let mut ocontainer: Container<Order>;
         // let mut qcontainer: Container<Quote>;
-        let mut strs: Str;
+        let mut strs: Str = Str::new();
 
         while let Some(token) = self.next() {
             match self.state {
@@ -83,7 +83,6 @@ impl Parser {
 
                             if let Some(token) = self.next() {
                                 if token.get_state() == TokenType::CodeInline {
-                                    strs = Str::new();
                                     strs.push(StrType::CodeInline(val));
                                 } else {
                                     continue;
@@ -132,7 +131,8 @@ impl Parser {
 
                         }
                         TokenType::Str => {
-
+                            strs.push(StrType::Normal(token.get_val()));
+                            self.state = ParseState::Paragraph;
                         }
                         _ => {
 
@@ -203,6 +203,19 @@ impl Parser {
                         }
                         _ => {}
                     }
+                }
+                ParseState::Paragraph => {
+                    self.before();
+                    let line = if let Some(line) = self.get_line_str() {
+                        line   
+                    } else {
+                        self.state = ParseState::None;
+                        self.before();
+                        objs.push(Box::new(Paragraph::new(strs)));
+                        strs = Str::new();
+                        continue;
+                    };
+                    strs.add_vec(line);
                 }
                 _ => {}
             }
